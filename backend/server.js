@@ -133,16 +133,17 @@ io.on("connection", (socket) => {
         return;
       }
 
-      // Check if already in room
-      const existingPlayer = room.players.find(
+      // Check if this wallet address is already in the room
+      const existingPlayerIndex = room.players.findIndex(
         (p) => p.address === userAddress.toLowerCase()
       );
 
-      if (existingPlayer) {
-        // Update signature and socket
-        existingPlayer.signatureData = signatureData;
-        existingPlayer.socketId = socket.id;
+      if (existingPlayerIndex !== -1) {
+        // This wallet is already in the room, update its socket and signature
+        room.players[existingPlayerIndex].socketId = socket.id;
+        room.players[existingPlayerIndex].signatureData = signatureData;
       } else {
+        // NEW PLAYER: Different wallet address joined
         room.players.push({
           address: userAddress.toLowerCase(),
           socketId: socket.id,

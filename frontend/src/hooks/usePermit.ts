@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useAccount, useSignTypedData, useReadContract } from "wagmi";
+import { useAccount, useSignTypedData, useReadContract, useChainId, useSwitchChain } from "wagmi";
 import { MOCK_USDC_ADDRESS, MOCK_USDC_ABI, MONAD_SPLITTER_ADDRESS } from "@/config/abi";
 import { monadTestnet } from "@/config/wagmi";
 
@@ -36,6 +36,8 @@ interface UsePermitReturn {
 export function usePermit(): UsePermitReturn {
   const { address } = useAccount();
   const { signTypedDataAsync } = useSignTypedData();
+  const chainId = useChainId();
+  const { switchChainAsync } = useSwitchChain();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,6 +58,17 @@ export function usePermit(): UsePermitReturn {
 
       setIsLoading(true);
       setError(null);
+
+      // Check if user is on the right network before signing
+      if (chainId !== monadTestnet.id) {
+        try {
+          await switchChainAsync({ chainId: monadTestnet.id });
+        } catch (switchErr) {
+          setError("Lütfen Monad Testnet ağına geçiş yapın.");
+          setIsLoading(false);
+          return null;
+        }
+      }
 
       try {
         const currentNonce = nonce ?? BigInt(0);

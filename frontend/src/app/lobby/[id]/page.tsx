@@ -7,6 +7,8 @@ import {
   useConnect,
   useWriteContract,
   useWaitForTransactionReceipt,
+  useChainId,
+  useSwitchChain,
 } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { parseUnits } from "viem";
@@ -27,6 +29,7 @@ import {
 } from "lucide-react";
 import { usePermit } from "@/hooks/usePermit";
 import { MONAD_SPLITTER_ADDRESS, MONAD_SPLITTER_ABI } from "@/config/abi";
+import { monadTestnet } from "@/config/wagmi";
 
 const BACKEND_URL = "http://localhost:3001";
 
@@ -70,6 +73,10 @@ export default function LobbyPage() {
   const roomId = params.id as string;
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
+
+  const isWrongNetwork = isConnected && chainId !== monadTestnet.id;
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [room, setRoom] = useState<RoomState | null>(null);
@@ -497,8 +504,25 @@ export default function LobbyPage() {
 
         {/* Action Area */}
         <div className="space-y-4">
+          {/* Wrong Network Overlay */}
+          {isConnected && isWrongNetwork && (
+            <div className="glass-card p-8 border-red-500/20 text-center animate-in fade-in zoom-in duration-300">
+              <Zap className="w-12 h-12 text-red-500 mx-auto mb-4 animate-pulse" />
+              <h2 className="text-xl font-bold mb-2">Yanlış Ağ Tespit Edildi</h2>
+              <p className="text-gray-400 text-sm mb-6 max-w-xs mx-auto">
+                Rulet masasında işlem yapabilmek için Monad Testnet ağına geçmelisin.
+              </p>
+              <button
+                onClick={() => switchChain({ chainId: monadTestnet.id })}
+                className="bg-red-600 hover:bg-red-500 text-white px-10 py-4 rounded-xl font-bold transition-all shadow-lg shadow-red-500/20 cursor-pointer"
+              >
+                Monad Testnet'e Geç
+              </button>
+            </div>
+          )}
+
           {/* Join / Sign buttons */}
-          {room && !hasJoined && !isHost && (
+          {room && !hasJoined && !isHost && !isWrongNetwork && (
             <button
               onClick={handleJoinRoom}
               disabled={isJoining || isPermitLoading}
@@ -519,7 +543,7 @@ export default function LobbyPage() {
           )}
 
           {/* Host sign button */}
-          {room && isHost && !currentPlayerSigned && !showResult && (
+          {room && isHost && !currentPlayerSigned && !showResult && !isWrongNetwork && (
             <button
               onClick={handleHostSign}
               disabled={isJoining || isPermitLoading}
@@ -602,7 +626,7 @@ export default function LobbyPage() {
 
                   <button
                     onClick={handleSettle}
-                    disabled={isSettling || isPaymentPending}
+                    disabled={isSettling || isPaymentPending || isWrongNetwork}
                     className="monad-gradient px-8 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 mx-auto cursor-pointer"
                   >
                     {isSettling || isPaymentPending ? (
@@ -673,7 +697,7 @@ export default function LobbyPage() {
             !isSpinning &&
             !showResult &&
             !isSettled &&
-            room.players.length >= 2 && (
+            room.players.length >= 2 && !isWrongNetwork && (
               <button
                 onClick={handleSpin}
                 className="w-full bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 py-5 rounded-xl font-extrabold text-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-3 pulse-glow cursor-pointer"

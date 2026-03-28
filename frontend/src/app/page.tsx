@@ -8,6 +8,8 @@ import {
   useWriteContract,
   useReadContract,
   useWaitForTransactionReceipt,
+  useChainId,
+  useSwitchChain,
 } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { parseUnits, formatUnits } from "viem";
@@ -28,6 +30,7 @@ import {
   X,
 } from "lucide-react";
 import { MOCK_USDC_ADDRESS, MOCK_USDC_ABI } from "@/config/abi";
+import { monadTestnet } from "@/config/wagmi";
 import { useRouter } from "next/navigation";
 
 const BACKEND_URL = "http://localhost:3001";
@@ -37,6 +40,10 @@ export default function HomePage() {
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
   const { disconnect } = useDisconnect();
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
+  
+  const isWrongNetwork = isConnected && chainId !== monadTestnet.id;
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -157,18 +164,27 @@ export default function HomePage() {
           </div>
 
           {isConnected ? (
-            <div className="flex items-center gap-3">
-              <div className="glass-card px-4 py-2 flex items-center gap-2">
-                <Coins className="w-4 h-4 text-purple-400" />
-                <span className="text-sm font-medium">{formattedBalance} mUSDC</span>
-              </div>
+            isWrongNetwork ? (
               <button
-                onClick={() => disconnect()}
-                className="glass-card px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors cursor-pointer"
+                onClick={() => switchChain({ chainId: monadTestnet.id })}
+                className="bg-red-500/10 text-red-400 border border-red-500/30 px-6 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 hover:bg-red-500/20 transition-colors cursor-pointer"
               >
-                {address?.slice(0, 6)}...{address?.slice(-4)}
+                Yanlış Ağ! Monad'a Geç
               </button>
-            </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="glass-card px-4 py-2 flex items-center gap-2">
+                  <Coins className="w-4 h-4 text-purple-400" />
+                  <span className="text-sm font-medium">{formattedBalance} mUSDC</span>
+                </div>
+                <button
+                  onClick={() => disconnect()}
+                  className="glass-card px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  {address?.slice(0, 6)}...{address?.slice(-4)}
+                </button>
+              </div>
+            )
           ) : (
             <button
               onClick={() => connect({ connector: injected() })}
@@ -244,7 +260,22 @@ export default function HomePage() {
 
         {/* Action Cards */}
         {isConnected && (
-          <div className="space-y-8">
+          isWrongNetwork ? (
+            <div className="glass-card p-10 max-w-lg mx-auto text-center border-red-500/20">
+              <Zap className="w-12 h-12 text-red-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Ağ Hatası</h3>
+              <p className="text-sm text-gray-400 mb-6">
+                Lütfen oyuna devam etmek için Monad Testnet ana ağına geçiş yapın.
+              </p>
+              <button
+                onClick={() => switchChain({ chainId: monadTestnet.id })}
+                className="bg-red-600 hover:bg-red-500 text-white px-8 py-3 rounded-xl font-medium transition-colors cursor-pointer"
+              >
+                Ağı Otomatik Değiştir
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-8">
             {/* Faucet */}
             <div className="glass-card p-6 max-w-lg mx-auto text-center">
               <h3 className="text-lg font-semibold mb-2 flex items-center justify-center gap-2">
@@ -311,6 +342,7 @@ export default function HomePage() {
               </button>
             </div>
           </div>
+          )
         )}
 
         {/* Not Connected State */}
