@@ -66,7 +66,7 @@ export function usePermit(): UsePermitReturn {
         const domain = {
           name: "Mock USDC",
           version: "1",
-          chainId: BigInt(monadTestnet.id),
+          chainId: monadTestnet.id,
           verifyingContract: MOCK_USDC_ADDRESS,
         };
 
@@ -89,7 +89,8 @@ export function usePermit(): UsePermitReturn {
         // Parse signature into v, r, s components
         const r = `0x${signature.slice(2, 66)}` as `0x${string}`;
         const s = `0x${signature.slice(66, 130)}` as `0x${string}`;
-        const v = parseInt(signature.slice(130, 132), 16);
+        let v = parseInt(signature.slice(130, 132), 16);
+        if (v < 27) v += 27;
 
         const result: PermitSignatureData = {
           v,

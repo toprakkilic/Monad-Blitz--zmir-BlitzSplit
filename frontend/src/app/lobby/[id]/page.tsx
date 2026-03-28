@@ -134,7 +134,11 @@ export default function LobbyPage() {
         );
         if (playerInRoom) {
           setHasJoined(true);
+        } else {
+          setHasJoined(false);
         }
+      } else {
+        setHasJoined(false);
       }
     });
 
@@ -176,7 +180,11 @@ export default function LobbyPage() {
               );
               if (playerInRoom) {
                 setHasJoined(true);
+              } else {
+                setHasJoined(false);
               }
+            } else {
+              setHasJoined(false);
             }
           }
         })
