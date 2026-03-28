@@ -1,1 +1,2 @@
-# Monad-Blitz--zmir-BlitzSplit
+# Monad Blitz - İzmir BlitzSplit
+Project initialized and connected to GitHub.
