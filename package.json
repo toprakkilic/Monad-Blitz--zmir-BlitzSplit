@@ -22,5 +22,10 @@
   "homepage": "https://github.com/toprakkilic/Monad-Blitz--zmir-BlitzSplit#readme",
   "dependencies": {
     "@openzeppelin/contracts": "^5.6.1"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^7.0.0",
+    "dotenv": "^17.3.1",
+    "hardhat": "^3.2.0"
   }
 }
