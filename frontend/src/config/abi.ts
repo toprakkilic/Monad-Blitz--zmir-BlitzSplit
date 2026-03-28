@@ -3,10 +3,10 @@
 // ============================================================
 
 // MockUSDC Contract Address (Monad Testnet - deploy and replace)
-export const MOCK_USDC_ADDRESS = "0x0000000000000000000000000000000000000001" as const;
+export const MOCK_USDC_ADDRESS = "0x21C32a1F984A367E6A900E2346E3405C48E61299" as const;
 
 // MonadSplitter Contract Address (Monad Testnet - deploy and replace)
-export const MONAD_SPLITTER_ADDRESS = "0x0000000000000000000000000000000000000002" as const;
+export const MONAD_SPLITTER_ADDRESS = "0xbDE2AC7a22d412a8F4E51FFbC529C9f6b33b19fE" as const;
 
 // MockUSDC ABI (ERC20 + ERC20Permit + mint)
 export const MOCK_USDC_ABI = [
